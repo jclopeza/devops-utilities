@@ -1,0 +1,13 @@
+---
+
+- hosts: localhost
+  connection: local
+  roles:
+    - { role: automated-versioning-system }
+    - { role: create-project-from-archetype }
+    - { role: delete-artifact-version }
+    - { role: deploy-application }
+    - { role: create-shop-from-baseshop }
+    - { role: create-git-project }
+    - { role: update-pom-version }
+    - { role: get-free-port }
