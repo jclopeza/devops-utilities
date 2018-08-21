@@ -2,6 +2,7 @@
 
 - hosts: localhost
   connection: local
+  become: true
   roles:
     - { role: automated-versioning-system }
     - { role: create-project-from-archetype }
@@ -11,3 +12,4 @@
     - { role: create-git-project }
     - { role: update-pom-version }
     - { role: get-free-port }
+    - { role: dar-maker }
