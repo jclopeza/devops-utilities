@@ -116,14 +116,14 @@ cd $BASEDIR
 #################################################################################
 # CONSULTAMOS A PDS, OBTENEMOS Y DESCOMPRIMIMOS EL COMPONENTE DE INFRAESTRUCTURA
 #################################################################################
-log "URL ---> $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_GET_ARTIFACTS_VERSIONS/$APPLICATION/$VERSION/"
-ARTIFACTS_VERSIONS=`curl -s $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_GET_ARTIFACTS_VERSIONS/$APPLICATION/$VERSION/`
-log "ARTIFACTS_VERSIONS=$ARTIFACTS_VERSIONS"
-echo $ARTIFACTS_VERSIONS | grep "doesn't exist" && {
-    MSG="ERR-010 Application/Version $APPLICATION/$VERSION doesn't exist in PDS!"
-    log "$MSG"
-    exit 1
-}
+# log "URL ---> $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_GET_ARTIFACTS_VERSIONS/$APPLICATION/$VERSION/"
+# ARTIFACTS_VERSIONS=`curl -s $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_GET_ARTIFACTS_VERSIONS/$APPLICATION/$VERSION/`
+# log "ARTIFACTS_VERSIONS=$ARTIFACTS_VERSIONS"
+# echo $ARTIFACTS_VERSIONS | grep "doesn't exist" && {
+#     MSG="ERR-010 Application/Version $APPLICATION/$VERSION doesn't exist in PDS!"
+#     log "$MSG"
+#     exit 1
+# }
 
 FILEPOM="$DIR_BASE/maven/$APPLICATION.xml"
 
@@ -146,15 +146,18 @@ sed "s/VERSION_DAR/$VERSION/g" -i pom.xml
 ######################################################################
 case "$APPLICATION" in
 congruencias)
-    SCHEMABDD_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:schemabdd"]."version"'`
-    WEBSERVICES_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:webservices"]."version"'`
-    WEBAPP_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:webapp"]."version"'`
-    SCHEMABDD_VERSION="${SCHEMABDD_VERSION%\"}"
-    SCHEMABDD_VERSION="${SCHEMABDD_VERSION#\"}"
-    WEBSERVICES_VERSION="${WEBSERVICES_VERSION%\"}"
-    WEBSERVICES_VERSION="${WEBSERVICES_VERSION#\"}"
-    WEBAPP_VERSION="${WEBAPP_VERSION%\"}"
-    WEBAPP_VERSION="${WEBAPP_VERSION#\"}"
+    # SCHEMABDD_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:schemabdd"]."version"'`
+    # WEBSERVICES_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:webservices"]."version"'`
+    # WEBAPP_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:webapp"]."version"'`
+    # SCHEMABDD_VERSION="${SCHEMABDD_VERSION%\"}"
+    # SCHEMABDD_VERSION="${SCHEMABDD_VERSION#\"}"
+    # WEBSERVICES_VERSION="${WEBSERVICES_VERSION%\"}"
+    # WEBSERVICES_VERSION="${WEBSERVICES_VERSION#\"}"
+    # WEBAPP_VERSION="${WEBAPP_VERSION%\"}"
+    # WEBAPP_VERSION="${WEBAPP_VERSION#\"}"
+    SCHEMABDD_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/schemabdd/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
+    WEBSERVICES_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webservices/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
+    WEBAPP_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
     log "SCHEMABDD_VERSION = $SCHEMABDD_VERSION"
     log "WEBSERVICES_VERSION = $WEBSERVICES_VERSION"
     log "WEBAPP_VERSION = $WEBAPP_VERSION"
