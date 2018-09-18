@@ -28,6 +28,7 @@ display_help() {
     echo "   -r rama de la que obtener el código fuente. Ejemplo: origin/feature5"
     echo "         Si no se pasa este parámetro, se tomará la rama master."
     echo "   -e email para notificaciones"
+    echo "   -b build number"
     echo
 }
 
@@ -71,7 +72,7 @@ URL_BUILD_JENKINS="http://localhost:8080/"
 #    COMPROBAMOS QUE RECIBIMOS LOS PARAMETROS NECESARIOS            #
 #####################################################################
 
-while getopts ":a:c:g:m:r:u:l:e:" opt; do
+while getopts ":a:c:g:m:r:u:l:e:b:" opt; do
     case $opt in
         m)
             log "Recibido el directorio con el pom.xml de Maven ... -m was triggered, Parameter: $OPTARG"
@@ -113,6 +114,10 @@ while getopts ":a:c:g:m:r:u:l:e:" opt; do
             log "Recibido el email ... -e was triggered, Parameter: $OPTARG"
             email=$OPTARG
             EMAIL_RECIBIDO="true"
+            ;;
+        b)
+            log "Recibido el numero de build ... -b was triggered, Parameter: $OPTARG"
+            BUILD_NUMBER=$OPTARG
             ;;
         \?)
             log "Invalid option: -$OPTARG, interrumpimos el proceso"
@@ -186,7 +191,7 @@ fi
 #    CONFIGURACION PATH DE TRABAJO PARA DESCARGA DEL PROYECTO GIT   #
 #####################################################################
 # Valor de ejemplo (por defecto)
-# /var/opt/vocento/automated-versioning-system/tag-manager
+# /var/opt/xebialabs/automated-versioning-system/tag-manager
 BASEDIR=$BASE_DIR_PROJECTS/$aplicacion
 
 #############################################
@@ -323,15 +328,15 @@ log "Tecnologia obtenida: $TECHNOLOGY_TYPE"
 # REPOSITORIO GIT Y TECNOLOGIA. ES MOMENTO DE
 # CREAR O VALIDAR QUE EXISTE ESTE ARTEFACTO EN LA BDD DE PDS
 ################################################################
-log "Aseguramos la existencia del artefacto en PDS"
-curl -s -H "Content-Type: application/json" \
-    $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_NEW_ARTIFACT \
-    -d '{"application": "'$aplicacion'", "component_group_id": "'$CURRENT_PROJECT_GROUPID'", "component_artifact_id": "'$CURRENT_PROJECT_ARTIFACTID'", "repository_git": "'$repositorio_git'", "technology_type": "'$TECHNOLOGY_TYPE'", "pom_directory": "'$directorio_pom'"}' -X POST || {
-        MSG="ERR-047 No ha sido posible crear el artefacto en PDS"
-        log "$MSG"
-        ko_notify
-    }
-log "Artefacto registrado en PDS: ok"
+# log "Aseguramos la existencia del artefacto en PDS"
+# curl -s -H "Content-Type: application/json" \
+#     $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_NEW_ARTIFACT \
+#     -d '{"application": "'$aplicacion'", "component_group_id": "'$CURRENT_PROJECT_GROUPID'", "component_artifact_id": "'$CURRENT_PROJECT_ARTIFACTID'", "repository_git": "'$repositorio_git'", "technology_type": "'$TECHNOLOGY_TYPE'", "pom_directory": "'$directorio_pom'"}' -X POST || {
+#         MSG="ERR-047 No ha sido posible crear el artefacto en PDS"
+#         log "$MSG"
+#         ko_notify
+#     }
+# log "Artefacto registrado en PDS: ok"
 
 #####################################################################################
 # HACEMOS EL TRATAMIENTO PARA DETERMINAR LA NUEVA VERSION DEL ARTEFACTO A CREAR
@@ -369,14 +374,14 @@ log "Major = $MAJOR, Minor = $MINOR, Patch = $PATCH"
 ############################################################
 # CALCULO Y ASIGNACION DE NUEVAS VERSIONES CALCULADAS
 ############################################################
-NEXT_BUILD_NUMBERS=`curl -s $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_NEXT_BUILD_NUMBER/$aplicacion/$CURRENT_PROJECT_GROUPID/$CURRENT_PROJECT_ARTIFACTID/`
-log "Resultado NEXT_BUILD_NUMBERS PDS = $NEXT_BUILD_NUMBERS"
-NEW_VERSION_APLICACION=`echo $NEXT_BUILD_NUMBERS | awk -F: '{ print $1 }'`
-NEW_VERSION_COMPONENTE=`echo $NEXT_BUILD_NUMBERS | awk -F: '{ print $2 }'`
+# NEXT_BUILD_NUMBERS=`curl -s $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_NEXT_BUILD_NUMBER/$aplicacion/$CURRENT_PROJECT_GROUPID/$CURRENT_PROJECT_ARTIFACTID/`
+# log "Resultado NEXT_BUILD_NUMBERS PDS = $NEXT_BUILD_NUMBERS"
+# NEW_VERSION_APLICACION=`echo $NEXT_BUILD_NUMBERS | awk -F: '{ print $1 }'`
+NEW_VERSION_COMPONENTE=$BUILD_NUMBER
 PROJECT_VERSION_RELEASE=$MAJOR.$MINOR.$PATCH
-APPLICATION_VERSION_RELEASE="$PROJECT_VERSION_RELEASE-B$NEW_VERSION_APLICACION"
+# APPLICATION_VERSION_RELEASE="$PROJECT_VERSION_RELEASE-B$NEW_VERSION_APLICACION"
 COMPONENT_VERSION_RELEASE="$PROJECT_VERSION_RELEASE-B$NEW_VERSION_COMPONENTE"
-log "Versión obtenida para nueva aplicación: $APPLICATION_VERSION_RELEASE"
+# log "Versión obtenida para nueva aplicación: $APPLICATION_VERSION_RELEASE"
 log "Versión obtenida para nuevo componente: $COMPONENT_VERSION_RELEASE"
 
 ############################################################################
@@ -384,19 +389,19 @@ log "Versión obtenida para nuevo componente: $COMPONENT_VERSION_RELEASE"
 # DE LA INFORMACION EN LA BASE DE DATOS DEL SISTEMA PDS
 ############################################################################
 # changelog=`echo $changelog | awk '{ print $1 }'`
-DATA_PAYLOAD='{"application": "'$aplicacion'", "group_id": "'$CURRENT_PROJECT_GROUPID'", "artifact_id": "'$CURRENT_PROJECT_ARTIFACTID'", "created_from_branch": "'$branch_source_code_original'", "app_version": "'$APPLICATION_VERSION_RELEASE'", "art_version": "'$COMPONENT_VERSION_RELEASE'", "build_url": "'$URL_BUILD_JENKINS'", "changelog": "'$changelog'", "email": "'$email'"}'
-log "DATA_PAYLOAD=$DATA_PAYLOAD"
-RETURN_CODE=`curl -s -w '%{http_code}' -H "Content-Type: application/json" \
-    $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_CREATE_NEW_VERSION \
-    -d "$DATA_PAYLOAD" \
-    -X POST`
-if [ "$RETURN_CODE" = "201" ]; then
-    log "Version $APPLICATION_VERSION_RELEASE creada correctamente para la aplicacion $aplicacion"
-else
-    MSG="ERR-031 Error al crear la version $APPLICATION_VERSION_RELEASE para la aplicacion $aplicacion"
-    log "$MSG"
-    ko_notify
-fi
+# DATA_PAYLOAD='{"application": "'$aplicacion'", "group_id": "'$CURRENT_PROJECT_GROUPID'", "artifact_id": "'$CURRENT_PROJECT_ARTIFACTID'", "created_from_branch": "'$branch_source_code_original'", "app_version": "'$APPLICATION_VERSION_RELEASE'", "art_version": "'$COMPONENT_VERSION_RELEASE'", "build_url": "'$URL_BUILD_JENKINS'", "changelog": "'$changelog'", "email": "'$email'"}'
+# log "DATA_PAYLOAD=$DATA_PAYLOAD"
+# RETURN_CODE=`curl -s -w '%{http_code}' -H "Content-Type: application/json" \
+#     $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_CREATE_NEW_VERSION \
+#     -d "$DATA_PAYLOAD" \
+#     -X POST`
+# if [ "$RETURN_CODE" = "201" ]; then
+#     log "Version $APPLICATION_VERSION_RELEASE creada correctamente para la aplicacion $aplicacion"
+# else
+#     MSG="ERR-031 Error al crear la version $APPLICATION_VERSION_RELEASE para la aplicacion $aplicacion"
+#     log "$MSG"
+#     ko_notify
+# fi
 
 ################################################################
 # VERIFICANDO QUE EL TAG QUE QUEREMOS CREAR NO EXISTE
@@ -537,11 +542,11 @@ fi
 case "$TECHNOLOGY_TYPE" in
 nginx-phpfpm)
     log "Se trata de un proyecto nginx-phpfpm, cambia la forma de obtener la URL para nexus"
-    URL_ARTIFACT_NEXUS="docker-repo.srv.vocento.in/nginx-phpfpm/$CURRENT_PROJECT_ARTIFACTID:$COMPONENT_VERSION_RELEASE"
+    URL_ARTIFACT_NEXUS="docker-repo.srv.xebialabs.in/nginx-phpfpm/$CURRENT_PROJECT_ARTIFACTID:$COMPONENT_VERSION_RELEASE"
     log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
     ;;
 *)
-    URL_ARTIFACT_NEXUS=`echo "$BUILD_RESULT" | grep Uploaded | egrep "\.war|\.zip|\.jar|\.aar"  | awk -F'Uploaded: '  '{ print $2 }' | awk '{ print $1 }'`
+    URL_ARTIFACT_NEXUS=`echo "$BUILD_RESULT" | grep Uploaded | egrep "\.war|\.zip|\.jar|\.aar"  | awk -F'Uploaded to nexus: '  '{ print $2 }' | awk '{ print $1 }'`
     log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
     if curl --output /dev/null --silent --head --fail "$URL_ARTIFACT_NEXUS"; then
         MSG="MSG-074 Chequeo URL existente: OK!"
@@ -586,15 +591,15 @@ duration=$((finish_time - start_time))
 # LA COMPILACION DEL PROYECTO MAVEN HA TERMINADO CON EXITO
 # AHORA HAY QUE ACTUALIZAR EL NIVEL DE MADUREZ DE LA PIEZA DE SOFTWARE QUE HEMOS CONSTRUIDO
 #################################################################################################
-log "Actualizamos el nivel de madurez del artefacto en la BDD de PDS"
-curl -s -H "Content-Type: application/json" \
-    $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_UPDATE_ML_APPLICATION \
-    -d '{"application_name": "'$aplicacion'", "component_name": "'$componente'", "application_version": "'$APPLICATION_VERSION_RELEASE'", "duration": "'$duration'", "state_application_version_id": "build_ok", "build_url": "'$URL_BUILD_JENKINS'", "repository_url": "'$URL_ARTIFACT_NEXUS'"}' -X POST || {
-        MSG="ERR-049 No ha sido posible actualizar el nivel de madurez en PDS"
-        log "$MSG"
-        ko_notify
-    }
-log "Nivel de madurez actualizado en PDS: ok"
+# log "Actualizamos el nivel de madurez del artefacto en la BDD de PDS"
+# curl -s -H "Content-Type: application/json" \
+#     $PROTOCOL_PDS://$HOST_PDS:$PORT_PDS$END_POINT_PDS_UPDATE_ML_APPLICATION \
+#     -d '{"application_name": "'$aplicacion'", "component_name": "'$componente'", "application_version": "'$APPLICATION_VERSION_RELEASE'", "duration": "'$duration'", "state_application_version_id": "build_ok", "build_url": "'$URL_BUILD_JENKINS'", "repository_url": "'$URL_ARTIFACT_NEXUS'"}' -X POST || {
+#         MSG="ERR-049 No ha sido posible actualizar el nivel de madurez en PDS"
+#         log "$MSG"
+#         ko_notify
+#     }
+# log "Nivel de madurez actualizado en PDS: ok"
 
 MSG="MSG-035 Versionado finalizado de forma correcta"
 log "$MSG"
