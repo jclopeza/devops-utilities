@@ -125,50 +125,67 @@ cd $BASEDIR
 #     exit 1
 # }
 
-FILEPOM="$DIR_BASE/maven/$APPLICATION.xml"
+# FILEPOM="$DIR_BASE/maven/$APPLICATION.xml"
+FILE_MANIFEST="$DIR_BASE/maven/$APPLICATION-deployit-manifest.xml"
 
-[ -f $FILEPOM ] || {
-    MSG="ERR-015 File $FILEPOM doesn't exist"
+# [ -f $FILEPOM ] || {
+#     MSG="ERR-015 File $FILEPOM doesn't exist"
+#     log "$MSG"
+#     exit 1
+# }
+
+[ -f $FILE_MANIFEST ] || {
+    MSG="ERR-015 File $FILE_MANIFEST doesn't exist"
     log "$MSG"
     exit 1
 }
 
+
 #######################################################################################
 # AHORA COPIAMOS EL FICHERO ORIGINAL AL DIRECTORIO TEMPORAL EN EL QUE SERA SUSTITUIDO #
 #######################################################################################
-log "Copying new pom file ..."
-cp $FILEPOM $BASEDIR/pom.xml
-log "Updating version in pom.xml ..."
-sed "s/VERSION_DAR/$VERSION/g" -i pom.xml
+# log "Copying new pom file ..."
+# cp $FILEPOM $BASEDIR/pom.xml
+# log "Updating version in pom.xml ..."
+# sed "s/VERSION_DAR/$VERSION/g" -i pom.xml
+
+log "Copying new manifest file ..."
+cp $FILE_MANIFEST $BASEDIR/deployit-manifest.xml
+log "Updating version in manifest.xml ..."
+sed "s/VERSION_DAR/$VERSION/g" -i deployit-manifest.xml
 
 ######################################################################
 # DEPENDIENDO DE LA APLICACIÓN INVOCAMOS DE UNA U OTRA FORMA A MAVEN #
 ######################################################################
 case "$APPLICATION" in
 congruencias)
-    # SCHEMABDD_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:schemabdd"]."version"'`
-    # WEBSERVICES_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:webservices"]."version"'`
-    # WEBAPP_VERSION=`echo $ARTIFACTS_VERSIONS | jq '.["com.xebialabs.congruencias:webapp"]."version"'`
-    # SCHEMABDD_VERSION="${SCHEMABDD_VERSION%\"}"
-    # SCHEMABDD_VERSION="${SCHEMABDD_VERSION#\"}"
-    # WEBSERVICES_VERSION="${WEBSERVICES_VERSION%\"}"
-    # WEBSERVICES_VERSION="${WEBSERVICES_VERSION#\"}"
-    # WEBAPP_VERSION="${WEBAPP_VERSION%\"}"
-    # WEBAPP_VERSION="${WEBAPP_VERSION#\"}"
     SCHEMABDD_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/schemabdd/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
-    WEBSERVICES_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webservices/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
     WEBAPP_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
     log "SCHEMABDD_VERSION = $SCHEMABDD_VERSION"
-    log "WEBSERVICES_VERSION = $WEBSERVICES_VERSION"
     log "WEBAPP_VERSION = $WEBAPP_VERSION"
-    mvn clean package deployit:import -Djavax.net.ssl.trustStore=/home/jcla/Certs/keystore.jks \
-    -Dcom.xebialabs.congruencias.schemabdd.version=$SCHEMABDD_VERSION \
-    -Dcom.xebialabs.congruencias.webservices.version=$WEBSERVICES_VERSION \
-    -Dcom.xebialabs.congruencias.webapp.version=$WEBAPP_VERSION
+    wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/schemabdd/$SCHEMABDD_VERSION/schemabdd-$SCHEMABDD_VERSION.zip
+    wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/$WEBAPP_VERSION/webapp-$WEBAPP_VERSION.war
+    sed "s/SCHEMABDD_VERSION/$SCHEMABDD_VERSION/g" -i deployit-manifest.xml
+    sed "s/WEBAPP_VERSION/$WEBAPP_VERSION/g" -i deployit-manifest.xml
+    # mvn clean package deployit:import -Djavax.net.ssl.trustStore=/home/jcla/Certs/keystore.jks \
+    # -Dcom.xebialabs.congruencias.schemabdd.version=$SCHEMABDD_VERSION \
+    # -Dcom.xebialabs.congruencias.webapp.version=$WEBAPP_VERSION
+    ;;
+webservices)
+    WEBSERVICES_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webservices/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
+    log "WEBSERVICES_VERSION = $WEBSERVICES_VERSION"
+    wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webservices/$WEBSERVICES_VERSION/webservices-$WEBSERVICES_VERSION.aar
+    sed "s/WEBSERVICES_VERSION/$WEBSERVICES_VERSION/g" -i deployit-manifest.xml
+    # mvn clean package deployit:import -Djavax.net.ssl.trustStore=/home/jcla/Certs/keystore.jks \
+    # -Dcom.xebialabs.congruencias.webservices.version=$WEBSERVICES_VERSION
     ;;
 *)
    ;;
 esac
+
+DAR_FILE=$APPLICATION-$VERSION.dar
+jar cf $DAR_FILE *
+curl -u admin:2001jcla -X POST -H "content-type:multipart/form-data" http://localhost:4516/deployit/package/upload/$DAR_FILE -F fileData=@$DAR_FILE
 
 finish_time=$(date +%s)
 
