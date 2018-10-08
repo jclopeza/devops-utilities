@@ -7,6 +7,6 @@
     debug:
       msg: "hola amigo"
   - name: insert/update configuration using a local file
-    blockinfile:
-      block: "{{ lookup('file', '/home/jcla/Projects/ansible-roles/playbooks/roles/pds/files/py_certificates.crt') }}"
-      dest: "/tmp/mira.txt"
+    copy:
+      src: "/tmp/ojo1/"
+      dest: "/tmp/ojo2"

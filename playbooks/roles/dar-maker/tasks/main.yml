@@ -27,10 +27,5 @@
 
 - name: copy pom.xml files
   copy:
-    src: "{{ item }}"
+    src: "files/"
     dest: "{{ dir_base }}/maven"
-  with_items:
-    - "congruencias.xml"
-    - "webservices.xml"
-    - "congruencias-deployit-manifest.xml"
-    - "webservices-deployit-manifest.xml"

@@ -179,6 +179,15 @@ webservices)
     # mvn clean package deployit:import -Djavax.net.ssl.trustStore=/home/jcla/Certs/keystore.jks \
     # -Dcom.xebialabs.congruencias.webservices.version=$WEBSERVICES_VERSION
     ;;
+congruencias-websphere)
+    WEBAPP_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
+    log "WEBAPP_VERSION = $WEBAPP_VERSION"
+    wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/$WEBAPP_VERSION/webapp-$WEBAPP_VERSION.war
+    sed "s/WEBAPP_VERSION/$WEBAPP_VERSION/g" -i deployit-manifest.xml
+    # mvn clean package deployit:import -Djavax.net.ssl.trustStore=/home/jcla/Certs/keystore.jks \
+    # -Dcom.xebialabs.congruencias.schemabdd.version=$SCHEMABDD_VERSION \
+    # -Dcom.xebialabs.congruencias.webapp.version=$WEBAPP_VERSION
+    ;;
 *)
    ;;
 esac

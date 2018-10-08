@@ -5,15 +5,15 @@
   <satisfiesOkTestManager>false</satisfiesOkTestManager>
   <satisfiesOkReleaseManager>false</satisfiesOkReleaseManager>
   <deployables>
-    <file.File name="/webservices" file="/webservices-WEBSERVICES_VERSION.aar">
+    <axis2.Aar name="/webservices" file="/webservices-WEBSERVICES_VERSION.aar">
       <tags />
       <scanPlaceholders>true</scanPlaceholders>
       <preScannedPlaceholders>true</preScannedPlaceholders>
       <placeholders />
       <checksum>WEBSERVICES_VERSION</checksum>
-      <targetPath>{{axis2.services.directory}}</targetPath>
+      <!-- <targetPath>{{axis2.services.directory}}</targetPath> -->
       <targetFileName>webservices.aar</targetFileName>
-    </file.File>
+    </axis2.Aar>
   </deployables>
   <applicationDependencies />
   <dependencyResolution>LATEST</dependencyResolution>
