@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<udm.DeploymentPackage version="VERSION_DAR" application="front">
+  <application />
+  <orchestrator />
+  <satisfiesOkTestManager>false</satisfiesOkTestManager>
+  <satisfiesOkReleaseManager>false</satisfiesOkReleaseManager>
+  <deployables>
+    <smoketest.HttpRequestTest name="/smokeTest">
+        <tags />
+        <url>{{smoke.test.url}}</url>
+        <expectedResponseText>Bienvenido a la calculadora</expectedResponseText>
+        <headers />
+    </smoketest.HttpRequestTest>
+    <sql.SqlScripts name="/schemabdd" file="/schemabdd-SCHEMABDD_VERSION.zip">
+        <tags />
+        <scanPlaceholders>true</scanPlaceholders>
+        <preScannedPlaceholders>true</preScannedPlaceholders>
+        <placeholders />
+        <checksum>SCHEMABDD_VERSION</checksum>
+    </sql.SqlScripts>
+    <tomcat.War name="/webapp" file="/webapp-WEBAPP_VERSION.war">
+      <tags />
+      <scanPlaceholders>true</scanPlaceholders>
+      <preScannedPlaceholders>true</preScannedPlaceholders>
+      <placeholders>
+        <value>url.webservices</value>
+      </placeholders>
+      <checksum>WEBAPP_VERSION</checksum>
+      <contextRoot>congruencias</contextRoot>
+    </tomcat.War>
+    <tomcat.DataSourceSpec name="congruenciasds">
+      <tags />
+      <jndiName>jdbc/CongruenciasDB</jndiName>
+      <driverClassName>com.mysql.jdbc.Driver</driverClassName>
+      <url>{{bdd.url}}</url>
+      <username>{{bdd.user}}</username>
+      <password>{{bdd.pass}}</password>
+      <connectionProperties />
+    </tomcat.DataSourceSpec>
+  </deployables>
+  <applicationDependencies>
+    <entry key="webservices">[VERSION_DAR-B1,VERSION_DAR-B99]</entry>
+  </applicationDependencies>
+  <dependencyResolution>LATEST</dependencyResolution>
+  <undeployDependencies>false</undeployDependencies>
+  <templates />
+  <boundTemplates />
+</udm.DeploymentPackage>
