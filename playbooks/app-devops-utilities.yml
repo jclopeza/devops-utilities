@@ -14,3 +14,4 @@
     - { role: get-free-port }
     - { role: dar-maker }
     - { role: manage-dependencies }
+    - { role: update-pom-versions }

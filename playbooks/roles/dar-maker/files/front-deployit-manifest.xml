@@ -5,12 +5,6 @@
   <satisfiesOkTestManager>false</satisfiesOkTestManager>
   <satisfiesOkReleaseManager>false</satisfiesOkReleaseManager>
   <deployables>
-    <smoketest.HttpRequestTest name="/smokeTest">
-        <tags />
-        <url>{{smoke.test.url}}</url>
-        <expectedResponseText>Bienvenido a la calculadora</expectedResponseText>
-        <headers />
-    </smoketest.HttpRequestTest>
     <sql.SqlScripts name="/schemabdd" file="/schemabdd-SCHEMABDD_VERSION.zip">
         <tags />
         <scanPlaceholders>true</scanPlaceholders>
@@ -39,7 +33,7 @@
     </tomcat.DataSourceSpec>
   </deployables>
   <applicationDependencies>
-    <entry key="webservices">[VERSION_DAR-B1,VERSION_DAR-B99]</entry>
+    <entry key="webservices">[VERSION_WS_DEPENDENCY-B1,VERSION_WS_DEPENDENCY-B99]</entry>
   </applicationDependencies>
   <dependencyResolution>LATEST</dependencyResolution>
   <undeployDependencies>false</undeployDependencies>
