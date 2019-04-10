@@ -12,6 +12,12 @@
         <placeholders />
         <checksum>SCHEMABDD_VERSION</checksum>
     </sql.SqlScripts>
+    <smoketest.HttpRequestTest name="/smokeTest">
+      <tags />
+      <url>{{smoke.test.url}}</url>
+      <expectedResponseText>Bienvenido a la calculadora</expectedResponseText>
+      <headers />
+    </smoketest.HttpRequestTest>
     <tomcat.War name="/webapp" file="/webapp-WEBAPP_VERSION.war">
       <tags />
       <scanPlaceholders>true</scanPlaceholders>
