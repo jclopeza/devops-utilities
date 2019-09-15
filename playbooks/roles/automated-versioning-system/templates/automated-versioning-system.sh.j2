@@ -546,7 +546,7 @@ nginx-phpfpm)
     log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
     ;;
 *)
-    URL_ARTIFACT_NEXUS=`echo "$BUILD_RESULT" | grep Uploaded | egrep "\.war|\.zip|\.jar|\.aar"  | awk -F'Uploaded to nexus: '  '{ print $2 }' | awk '{ print $1 }'`
+    URL_ARTIFACT_NEXUS=`echo "$BUILD_RESULT" | grep Uploaded | egrep "\.war|\.zip|\.jar|\.aar"  | awk -F'Uploaded to nexus3: '  '{ print $2 }' | awk '{ print $1 }'`
     log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
     if curl --output /dev/null --silent --head --fail "$URL_ARTIFACT_NEXUS"; then
         MSG="MSG-074 Chequeo URL existente: OK!"
