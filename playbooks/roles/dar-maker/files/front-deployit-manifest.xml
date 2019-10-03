@@ -37,6 +37,16 @@
       <password>{{bdd.pass}}</password>
       <connectionProperties />
     </tomcat.DataSourceSpec>
+    <www.ApacheVirtualHostSpec name="/virtualhost">
+      <host>localhost</host>
+      <port>{{apache.port}}</port>
+      <documentRoot>{{document.root}}/tutorial</documentRoot>
+    </www.ApacheVirtualHostSpec>
+    <www.WebContent name="/webcontent" file="/tutorial-TUTORIAL_VERSION.zip">
+      <scanPlaceholders>true</scanPlaceholders>
+      <preScannedPlaceholders>true</preScannedPlaceholders>
+      <checksum>TUTORIAL_VERSION</checksum>
+    </www.WebContent>
   </deployables>
   <applicationDependencies>
     <entry key="webservices">[VERSION_WS_DEPENDENCY-B1,VERSION_WS_DEPENDENCY-B99]</entry>

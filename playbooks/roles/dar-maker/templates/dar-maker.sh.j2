@@ -174,12 +174,16 @@ congruencias)
 front)
     SCHEMABDD_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/schemabdd/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
     WEBAPP_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
+    TUTORIAL_VERSION=`wget -O - -o /dev/null http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/tutorial/maven-metadata.xml | grep -Po '(?<=<version>)([0-9\.\-B]+(-SNAPSHOT)?)' | sort --version-sort -r | head -n 1`
     log "SCHEMABDD_VERSION = $SCHEMABDD_VERSION"
     log "WEBAPP_VERSION = $WEBAPP_VERSION"
+    log "TUTORIAL_VERSION = $TUTORIAL_VERSION"
     wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/schemabdd/$SCHEMABDD_VERSION/schemabdd-$SCHEMABDD_VERSION.zip
     wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/webapp/$WEBAPP_VERSION/webapp-$WEBAPP_VERSION.war
+    wget http://localhost:8081/repository/maven-releases/com/xebialabs/congruencias/tutorial/$TUTORIAL_VERSION/tutorial-$TUTORIAL_VERSION.zip
     sed "s/SCHEMABDD_VERSION/$SCHEMABDD_VERSION/g" -i deployit-manifest.xml
     sed "s/WEBAPP_VERSION/$WEBAPP_VERSION/g" -i deployit-manifest.xml
+    sed "s/TUTORIAL_VERSION/$TUTORIAL_VERSION/g" -i deployit-manifest.xml
     VERSION_WS_DEPENDENCY=`echo $VERSION | awk -F-B '{ print $1 }'`
     sed "s/VERSION_WS_DEPENDENCY/$VERSION_WS_DEPENDENCY/g" -i deployit-manifest.xml
     # mvn clean package deployit:import -Djavax.net.ssl.trustStore=/home/jcla/Certs/keystore.jks \
