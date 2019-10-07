@@ -37,11 +37,10 @@
       <password>{{bdd.pass}}</password>
       <connectionProperties />
     </tomcat.DataSourceSpec>
-    <www.ApacheVirtualHostSpec name="/virtualhost">
-      <host>localhost</host>
-      <port>{{apache.port}}</port>
-      <documentRoot>{{document.root}}/tutorial</documentRoot>
-    </www.ApacheVirtualHostSpec>
+    <www.ApacheVirtualHostByPortSpec name="/virtualhost">
+      <port>81</port>
+      <documentRoot>/var/www/tutorial</documentRoot>
+    </www.ApacheVirtualHostByPortSpec>
     <www.WebContent name="/webcontent" file="/tutorial-TUTORIAL_VERSION.zip">
       <scanPlaceholders>true</scanPlaceholders>
       <preScannedPlaceholders>true</preScannedPlaceholders>
