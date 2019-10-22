@@ -11,6 +11,8 @@ spec:
   type: udm.Application
 - name: !format Applications/Applications/application-voting-app-docker/vote-voting-app-docker/%version%
   type: udm.DeploymentPackage
+  orchestrator:
+  - sequential-by-dependency
   deployables:
   - name: vote-container
     type: docker.ContainerSpec
