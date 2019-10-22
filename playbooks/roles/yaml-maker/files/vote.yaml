@@ -23,3 +23,7 @@ spec:
       type: docker.PortSpec
       hostPort: "5000"
       containerPort: "80"
+  applicationDependencies:
+    redis-voting-app-docker: ""
+    network-voting-app-docker: ""
+  dependencyResolution: EXISTING
