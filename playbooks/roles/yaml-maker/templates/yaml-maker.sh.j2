@@ -16,6 +16,7 @@ display_help() {
     echo "Usage: $0 [option...]"
     echo
     echo "   -a application"
+    echo "   -m microservice"
     echo "   -v version"
     echo
 }
@@ -43,11 +44,15 @@ log "$MSG"
 #    COMPROBAMOS QUE RECIBIMOS LOS PARAMETROS NECESARIOS            #
 #####################################################################
 
-while getopts ":a:v:" opt; do
+while getopts ":a:m:v:" opt; do
     case $opt in
         a)
             log "Application received ... -a was triggered, Parameter: $OPTARG"
             APPLICATION=$OPTARG
+            ;;
+        m)
+            log "Microservice received ... -m was triggered, Parameter: $OPTARG"
+            MICROSERVICE=$OPTARG
             ;;
         v)
             log "Version received ... -v was triggered, Parameter: $OPTARG"
@@ -67,6 +72,14 @@ done
 if [ -z "$APPLICATION" ]
 then
     MSG="ERR-005 Application must be provided"
+    log "$MSG"
+    display_help
+    exit 1
+fi
+
+if [ -z "$MICROSERVICE" ]
+then
+    MSG="ERR-005 Microservice must be provided"
     log "$MSG"
     display_help
     exit 1
@@ -113,6 +126,12 @@ fi
 #####################################
 cd $BASEDIR
 
+####################################################################
+# COPIAMOS LOS FICHEROS DE LOG Y TRAZABILIDAD AL DIRECTORIO ACTUAL #
+####################################################################
+cp $DIR_CFG_FILES/$APPLICATION-$MICROSERVICE-$VERSION.log $BASEDIR/file
+. $DIR_CFG_FILES/$APPLICATION-$MICROSERVICE-$VERSION.cfg
+
 FILE_MANIFEST="$DIR_BASE/yamls/$APPLICATION.yaml"
 
 [ -f $FILE_MANIFEST ] || {
@@ -124,7 +143,7 @@ FILE_MANIFEST="$DIR_BASE/yamls/$APPLICATION.yaml"
 log "Copying new manifest file ..."
 cp $FILE_MANIFEST $BASEDIR/application.yaml
 
-xl apply -f application.yaml --values version=$VERSION
+xl apply -f application.yaml --values version=$VERSION,gitRepo=$GIT_REPO,buildUrl=$BUILD_URL,commidId=$COMMIT_ID
 
 finish_time=$(date +%s)
 

@@ -26,6 +26,9 @@ spec:
       hostPort: "5000"
       containerPort: "80"
   changeLog: !source file
+  gitRepo: !value gitRepo
+  buildUrl: !value buildUrl
+  commidId: !value commidId
   applicationDependencies:
     redis-voting-app-docker: ""
     network-voting-app-docker: ""
