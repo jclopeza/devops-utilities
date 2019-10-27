@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 PROGNAME=$(basename $0)
 PROGCODE=AUTVS
 
@@ -608,6 +607,23 @@ duration=$((finish_time - start_time))
 
 MSG="MSG-035 Versionado finalizado de forma correcta"
 log "$MSG"
+
+##########################################################################
+# GENERAMOS INFORMACIÓN RELACIONADA CON LOS ARTEFACTOS QUE VAMOS A CREAR #
+##########################################################################
+MSG="MSG-040 Generamos ahora información relacionada con el artefacto para alimentar el deployment package"
+log "$MSG"
+DIR_BASE_FICHERO_YAML={{ dir_work }}/yaml-maker/yamls-cfg-files/
+FICHERO_YAML=${DIR_BASE_FICHERO_YAML}/${aplicacion}-${componente}-${COMPONENT_VERSION_RELEASE}.cfg
+FICHERO_LOG=${DIR_BASE_FICHERO_YAML}/${aplicacion}-${componente}-${COMPONENT_VERSION_RELEASE}.log
+[ -f ${FICHERO_YAML} ] && rm ${FICHERO_YAML}
+[ -f ${FICHERO_LOG} ] && rm ${FICHERO_LOG}
+echo "GIT_REPO=${repositorio_git}" >> ${FICHERO_YAML}
+echo "BUILD_URL=${BUILD_URL}" >> ${FICHERO_YAML}
+COMMIT_ID=`${GIT_COMMAND} log --format="%H" -n 1`
+echo "COMMIT_ID=${COMMIT_ID}" >> ${FICHERO_YAML}
+${GIT_COMMAND} log -n 10 --pretty=format:"%s" >> ${FICHERO_LOG}
+chmod +x ${FICHERO_YAML}
 
 finish_time=$(date +%s)
 

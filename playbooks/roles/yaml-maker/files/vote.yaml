@@ -1,4 +1,4 @@
-# xl apply -f application.yaml --values version=32.0.0-B6
+# xl apply -f vote.yaml --values version=32.0.0-B6
 ---
 apiVersion: xl-deploy/v1
 kind: Applications
@@ -25,6 +25,7 @@ spec:
       type: docker.PortSpec
       hostPort: "5000"
       containerPort: "80"
+  changeLog: !source file
   applicationDependencies:
     redis-voting-app-docker: ""
     network-voting-app-docker: ""
