@@ -28,7 +28,7 @@ spec:
   changeLog: !source file
   gitRepo: !value gitRepo
   buildUrl: !value buildUrl
-  commidId: !value commidId
+  commitId: !value commitId
   applicationDependencies:
     redis-voting-app-docker: ""
     network-voting-app-docker: ""

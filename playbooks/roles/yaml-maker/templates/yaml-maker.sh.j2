@@ -101,7 +101,7 @@ MSG="MSG-005 All parameters received" && log "$MSG"
 ###################################
 #    CONFIGURACION PATH DE TRABAJO
 ###################################
-BASEDIR=$DIR_WORK_TEMP/$APPLICATION-$VERSION
+BASEDIR=$DIR_WORK_TEMP/$APPLICATION-$MICROSERVICE-$VERSION
 
 #############################################
 # ELIMINAMOS EL DIRECTORIO DE TRABAJO
@@ -132,7 +132,7 @@ cd $BASEDIR
 cp $DIR_CFG_FILES/$APPLICATION-$MICROSERVICE-$VERSION.log $BASEDIR/file
 . $DIR_CFG_FILES/$APPLICATION-$MICROSERVICE-$VERSION.cfg
 
-FILE_MANIFEST="$DIR_BASE/yamls/$APPLICATION.yaml"
+FILE_MANIFEST="$DIR_BASE/yamls/$APPLICATION-$MICROSERVICE.yaml"
 
 [ -f $FILE_MANIFEST ] || {
     MSG="ERR-015 File $FILE_MANIFEST doesn't exist"
@@ -143,7 +143,7 @@ FILE_MANIFEST="$DIR_BASE/yamls/$APPLICATION.yaml"
 log "Copying new manifest file ..."
 cp $FILE_MANIFEST $BASEDIR/application.yaml
 
-xl apply -f application.yaml --values version=$VERSION,gitRepo=$GIT_REPO,buildUrl=$BUILD_URL,commidId=$COMMIT_ID
+xl apply -f application.yaml --values version=$VERSION,gitRepo=$GIT_REPO,buildUrl=$BUILD_URL,commitId=$COMMIT_ID
 
 finish_time=$(date +%s)
 
