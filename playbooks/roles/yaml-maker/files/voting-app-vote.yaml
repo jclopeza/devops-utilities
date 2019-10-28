@@ -29,6 +29,7 @@ spec:
   gitRepo: !value gitRepo
   buildUrl: !value buildUrl
   commitId: !value commitId
+  undeployDependencies: true
   applicationDependencies:
     redis-voting-app-docker: ""
     network-voting-app-docker: ""
