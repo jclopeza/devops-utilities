@@ -549,6 +549,11 @@ voting-app)
     URL_ARTIFACT_NEXUS="lyhsoft-registry:8084/$CURRENT_PROJECT_ARTIFACTID:$COMPONENT_VERSION_RELEASE"
     log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
     ;;
+calculator-app)
+    log "Se trata del proyecto calculator-app, cambia la forma de obtener la URL para nexus"
+    URL_ARTIFACT_NEXUS="lyhsoft-registry:8084/$CURRENT_PROJECT_ARTIFACTID:$COMPONENT_VERSION_RELEASE"
+    log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
+    ;;
 *)
     URL_ARTIFACT_NEXUS=`echo "$BUILD_RESULT" | grep Uploaded | egrep "\.war|\.zip|\.jar|\.aar"  | awk -F'Uploaded to nexus: '  '{ print $2 }' | awk '{ print $1 }'`
     log "URL obtenida para el artefacto en Nexus = $URL_ARTIFACT_NEXUS"
